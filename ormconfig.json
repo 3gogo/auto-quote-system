@@ -1,0 +1,18 @@
+{
+  "type": "mysql",
+  "host": "localhost",
+  "port": 3306,
+  "username": "root",
+  "password": "your_password",
+  "database": "auto_quote_system",
+  "entities": ["src/database/models/**/*.ts"],
+  "migrations": ["src/database/migrations/**/*.ts"],
+  "subscribers": ["src/database/subscribers/**/*.ts"],
+  "cli": {
+    "entitiesDir": "src/database/models",
+    "migrationsDir": "src/database/migrations",
+    "subscribersDir": "src/database/subscribers"
+  },
+  "logging": false,
+  "synchronize": false
+}

@@ -1,0 +1,41 @@
+{
+  "server": {
+    "port": 3000,
+    "env": "development",
+    "logLevel": "info"
+  },
+  "database": {
+    "host": "localhost",
+    "port": 3306,
+    "name": "auto_quote_system",
+    "user": "root",
+    "password": "your_password",
+    "logging": false
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "password": ""
+  },
+  "jwt": {
+    "secret": "your_jwt_secret_key",
+    "expiresIn": "24h"
+  },
+  "cors": {
+    "origin": "http://localhost:3000"
+  },
+  "security": {
+    "bcryptRounds": 12,
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 100
+    }
+  },
+  "voice": {
+    "asrEngine": "whisper",
+    "ttsEngine": "paddle"
+  },
+  "nlu": {
+    "model": "ernie-tiny"
+  }
+}
