@@ -18,8 +18,8 @@ export interface TTSSynthesisOptions extends TTSEngineOptions {
  * 负责语音识别和语音合成功能
  */
 export class VoiceService {
-  private asrEngine: ASREngine;
-  private ttsEngine: TTSEngine;
+  private asrEngine!: ASREngine;
+  private ttsEngine!: TTSEngine;
   private initialized: boolean = false;
 
   constructor() {}

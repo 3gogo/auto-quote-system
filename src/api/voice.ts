@@ -1,5 +1,6 @@
 import express from 'express';
 import { voiceService } from '../services/voice-service';
+import { hotwordService } from '../services/hotword-service';
 import { VoiceRecognitionRequest, VoiceRecognitionResponse, TTSSynthesisRequest, TTSSynthesisResponse } from '../types/voice';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -37,15 +38,11 @@ router.post('/recognize', async (req: Request, res: Response) => {
       });
     }
 
-    // 设置热词
+    // 从热词服务获取热词（条件刷新）
+    await hotwordService.refreshIfNeeded();
     const hotwordsList = [
-      ...(hotwords || []),
-      // 默认热词：常见商品名
-      '可乐', '雪碧', '芬达', '农夫山泉', '娃哈哈',
-      '纸巾', '抽纸', '心相印', '清风', '维达',
-      '洗衣液', '蓝月亮', '奥妙', '汰渍',
-      // 常见数量单位
-      '瓶', '包', '袋', '箱', '盒', '个', '只'
+      ...hotwordService.getAllHotwords(),
+      ...(hotwords || [])
     ];
 
     voiceService.setHotwords(hotwordsList);
@@ -67,14 +64,14 @@ router.post('/recognize', async (req: Request, res: Response) => {
     // 记录日志
     console.log(`语音识别成功: ${result.text} (置信度: ${result.confidence}, 耗时: ${processingTime}ms)`);
 
-    res.json({
+    return res.json({
       success: true,
       data: response
     });
 
   } catch (error) {
     console.error('语音识别失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : '语音识别失败',
@@ -111,13 +108,11 @@ router.post('/recognize/file', async (req: Request, res: Response) => {
       });
     }
 
-    // 设置热词
+    // 从热词服务获取热词
+    await hotwordService.refreshIfNeeded();
     const hotwordsList = [
-      ...(hotwords || []),
-      '可乐', '雪碧', '芬达', '农夫山泉', '娃哈哈',
-      '纸巾', '抽纸', '心相印', '清风', '维达',
-      '洗衣液', '蓝月亮', '奥妙', '汰渍',
-      '瓶', '包', '袋', '箱', '盒', '个', '只'
+      ...hotwordService.getAllHotwords(),
+      ...(hotwords || [])
     ];
 
     voiceService.setHotwords(hotwordsList);
@@ -138,14 +133,14 @@ router.post('/recognize/file', async (req: Request, res: Response) => {
 
     console.log(`文件语音识别成功: ${result.text} (置信度: ${result.confidence}, 耗时: ${processingTime}ms)`);
 
-    res.json({
+    return res.json({
       success: true,
       data: response
     });
 
   } catch (error) {
     console.error('文件语音识别失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : '文件语音识别失败',
@@ -162,7 +157,7 @@ router.get('/status', async (req: Request, res: Response) => {
   try {
     const options = voiceService.getOptions();
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         status: 'initialized',
@@ -172,7 +167,7 @@ router.get('/status', async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: '获取状态失败',
@@ -200,7 +195,7 @@ router.post('/hotwords', async (req: Request, res: Response) => {
 
     voiceService.setHotwords(hotwords);
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         hotwords,
@@ -210,7 +205,7 @@ router.post('/hotwords', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('设置热词失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : '设置热词失败',
@@ -258,14 +253,14 @@ router.post('/tts', async (req: Request, res: Response) => {
     // 记录日志
     console.log(`TTS 合成成功: ${text.substring(0, 50)} (耗时: ${processingTime}ms)`);
 
-    res.json({
+    return res.json({
       success: true,
       data: response
     });
 
   } catch (error) {
     console.error('TTS 合成失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'TTS 合成失败',
@@ -308,7 +303,7 @@ router.post('/tts/file', async (req: Request, res: Response) => {
       speed: speed || 1.0,
       volume: volume || 80,
       pitch: pitch || 0,
-      format: format || 'wav',
+      format: (format || 'wav') as 'wav' | 'mp3' | 'ogg',
       sampleRate: sampleRate || 16000,
       language: language || 'zh-CN'
     });
@@ -322,14 +317,14 @@ router.post('/tts/file', async (req: Request, res: Response) => {
 
     console.log(`TTS 合成文件成功: ${filePath} (耗时: ${processingTime}ms)`);
 
-    res.json({
+    return res.json({
       success: true,
       data: response
     });
 
   } catch (error) {
     console.error('TTS 合成文件失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : 'TTS 合成文件失败',
@@ -346,7 +341,7 @@ router.get('/tts/status', async (req: Request, res: Response) => {
   try {
     const options = voiceService.getTTSOptions();
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         status: 'initialized',
@@ -356,7 +351,7 @@ router.get('/tts/status', async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: '获取 TTS 状态失败',
@@ -379,7 +374,7 @@ router.post('/tts/settings', async (req: Request, res: Response) => {
     if (volume !== undefined) voiceService.setTTSVolume(volume);
     if (pitch !== undefined) voiceService.setTTSPitch(pitch);
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         message: 'TTS 设置更新成功',
@@ -394,7 +389,7 @@ router.post('/tts/settings', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('设置 TTS 参数失败:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         message: error instanceof Error ? error.message : '设置 TTS 参数失败',

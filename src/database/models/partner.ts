@@ -11,8 +11,8 @@ export class Partner {
   @Column({ type: 'enum', enum: ['customer', 'supplier'], comment: 'customer/supplier' })
   type: 'customer' | 'supplier';
 
-  @Column({ type: 'enum', enum: ['regular', 'normal', 'small_business', 'big_customer'], nullable: true, comment: '普通/熟客/小商户/大客户等' })
-  level: 'regular' | 'normal' | 'small_business' | 'big_customer' | null;
+  @Column({ type: 'enum', enum: ['normal', 'regular', 'small_business', 'big_customer'], nullable: true, comment: '普通顾客/熟客/小商户/大客户' })
+  level: 'normal' | 'regular' | 'small_business' | 'big_customer' | null;
 
   @Column({ length: 500, nullable: true, comment: '备注（如"楼上理发店"）' })
   note: string;

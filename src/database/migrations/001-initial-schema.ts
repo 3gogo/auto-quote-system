@@ -103,9 +103,9 @@ export class InitialSchema1700000000000 implements MigrationInterface {
           {
             name: 'level',
             type: 'enum',
-            enum: ['regular', 'normal', 'small_business', 'big_customer'],
+            enum: ['normal', 'regular', 'small_business', 'big_customer'],
             isNullable: true,
-            comment: '普通/熟客/小商户/大客户等',
+            comment: '普通顾客/熟客/小商户/大客户',
           },
           {
             name: 'note',
