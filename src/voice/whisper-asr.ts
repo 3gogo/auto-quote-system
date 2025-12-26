@@ -13,12 +13,12 @@ export class WhisperASREngine extends ASREngine {
   private whisperCppPath: string;
   private tempDir: string;
 
-  constructor(options: ASROptions = {}) {
+  constructor(options: ASROptions & { modelPath?: string; whisperPath?: string } = {}) {
     super(options);
 
     // 默认配置
-    this.modelPath = process.env.WHISPER_MODEL_PATH || path.join(__dirname, '../../../models/ggml-base.bin');
-    this.whisperCppPath = process.env.WHISPER_CPP_PATH || path.join(__dirname, '../../../whisper.cpp/main');
+    this.modelPath = options.modelPath || process.env.WHISPER_MODEL_PATH || path.join(__dirname, '../../../models/ggml-base.bin');
+    this.whisperCppPath = options.whisperPath || process.env.WHISPER_CPP_PATH || path.join(__dirname, '../../../whisper.cpp/main');
     this.tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'auto-quote-asr-'));
 
     console.log('初始化 Whisper.cpp ASR 引擎');
@@ -42,42 +42,59 @@ export class WhisperASREngine extends ASREngine {
 
   async recognize(audioBuffer: Buffer): Promise<ASRResult> {
     // 生成临时文件
-    const tempFile = path.join(this.tempDir, `audio-${Date.now()}.wav`);
-    const outputFile = path.join(this.tempDir, `output-${Date.now()}.txt`);
+    const timestamp = Date.now();
+    const tempFile = path.join(this.tempDir, `audio-${timestamp}.wav`);
+    const outputFileBase = path.join(this.tempDir, `output-${timestamp}`);
+    const outputFileTxt = `${outputFileBase}.txt`;
 
     try {
       // 保存音频文件
       fs.writeFileSync(tempFile, audioBuffer);
 
-      // 构建命令行参数
+      // 构建命令行参数（适配新版 whisper-cli）
       const args = [
         '-m', this.modelPath,
         '-f', tempFile,
-        '-of', outputFile.replace('.txt', ''),
-        '-l', this.options.language || 'zh',
-        '--print-all',
-        '--no-timestamps'
+        '-of', outputFileBase,
+        '-otxt',  // 输出 txt 文件
+        '-l', (this.options.language || 'zh').split('-')[0],  // 只取语言代码主体部分 (zh-CN -> zh)
+        '-nt',    // 不输出时间戳
+        '-np'     // 只输出结果
       ];
 
-      // 如果有热词，添加到参数中
-      if (this.options.hotwords && this.options.hotwords.length > 0) {
-        args.push('-dt', this.options.hotwords.join(','));
-      }
+      console.log(`[ASR] 执行命令: ${this.whisperCppPath} ${args.join(' ')}`);
+      console.log(`[ASR] 临时音频文件大小: ${fs.statSync(tempFile).size} bytes`);
 
       // 执行 whisper.cpp
       const result = await this.execWhisperCpp(args);
 
+      console.log(`[ASR] whisper 执行完成，耗时: ${result.duration}ms`);
+      console.log(`[ASR] stdout: ${result.stdout.substring(0, 200)}`);
+      console.log(`[ASR] stderr: ${result.stderr.substring(0, 200)}`);
+      console.log(`[ASR] 输出文件存在: ${fs.existsSync(outputFileTxt)}`);
+
       // 读取输出文件
       let text = '';
-      if (fs.existsSync(outputFile)) {
-        text = fs.readFileSync(outputFile, 'utf-8').trim();
+      if (fs.existsSync(outputFileTxt)) {
+        text = fs.readFileSync(outputFileTxt, 'utf-8').trim();
+        console.log(`[ASR] 从文件读取结果: "${text}"`);
       } else {
-        text = result.stdout;
+        // 从 stdout 解析结果（备用方案）
+        const lines = result.stdout.split('\n');
+        for (const line of lines) {
+          // 跳过时间戳行和日志行
+          if (line.startsWith('[') || line.includes('whisper_') || line.includes('main:')) {
+            continue;
+          }
+          text += line.trim() + ' ';
+        }
+        text = text.trim();
+        console.log(`[ASR] 从 stdout 解析结果: "${text}"`);
       }
 
       return {
         text: text || '',
-        confidence: 0.9, // Whisper.cpp 不直接返回置信度，这里给一个默认值
+        confidence: 0.9,
         language: this.options.language,
         duration: result.duration
       };
@@ -85,7 +102,7 @@ export class WhisperASREngine extends ASREngine {
       // 清理临时文件
       try {
         if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
-        if (fs.existsSync(outputFile)) fs.unlinkSync(outputFile);
+        if (fs.existsSync(outputFileTxt)) fs.unlinkSync(outputFileTxt);
       } catch (error) {
         console.warn('清理临时文件失败:', error);
       }

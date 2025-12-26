@@ -12,11 +12,14 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
+    "test:modules": "ts-node scripts/verify-modules.ts",
+    "test:e2e": "ts-node scripts/e2e-test.ts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
     "db:migrate": "typeorm migration:run",
-    "db:rollback": "typeorm migration:revert"
+    "db:rollback": "typeorm migration:revert",
+    "sync:shared": "node scripts/sync-shared-code.js"
   },
   "keywords": [],
   "author": "",
@@ -41,10 +44,15 @@
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.28",
     "typescript": "^5.9.3",
+    "uuid": "^11.0.5",
     "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/morgan": "^1.9.10"
+    "@types/jest": "^30.0.0",
+    "@types/morgan": "^1.9.10",
+    "@types/uuid": "^10.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6"
   }
 }

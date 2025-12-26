@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { databaseService } from './database';
 import voiceApi from './api/voice';
+import conversationApi from './api/conversation';
+import transactionApi from './api/transaction';
 
 // 加载环境变量
 dotenv.config();
@@ -39,6 +41,8 @@ app.get('/health', (req, res) => {
 
 // API 路由
 app.use('/api/voice', voiceApi);
+app.use('/api/conversation', conversationApi);
+app.use('/api/transactions', transactionApi);
 
 // 根路径
 app.get('/api', (req, res) => {
@@ -47,6 +51,8 @@ app.get('/api', (req, res) => {
     version: process.env.npm_package_version || '1.0.0',
     endpoints: {
       voice: '/api/voice',
+      conversation: '/api/conversation',
+      transactions: '/api/transactions',
       health: '/health'
     }
   });

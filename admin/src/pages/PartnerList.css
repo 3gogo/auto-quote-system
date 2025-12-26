@@ -1,0 +1,68 @@
+/* 顾客列表页面样式 */
+
+.partner-list-page {
+  background-color: var(--bg-color);
+  min-height: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: var(--text-tertiary);
+  gap: 16px;
+}
+
+.search-bar {
+  background-color: var(--card-bg);
+  padding: 12px 16px;
+}
+
+.stats-bar {
+  padding: 8px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* 头像 */
+.partner-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+/* 顾客信息 */
+.partner-info {
+  display: flex;
+  align-items: center;
+}
+
+.partner-name {
+  font-weight: 500;
+}
+
+.partner-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.partner-phone {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.partner-aliases {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+

@@ -2,6 +2,7 @@ import { ASREngine, ASRResult, ASROptions } from '../voice/asr-engine';
 import { WhisperASREngine } from '../voice/whisper-asr';
 import { TTSEngine, TTSAudio, TTSEngineOptions } from '../voice/tts-engine';
 import { PaddleTTSEngine } from '../voice/paddle-tts';
+import { EdgeTTSEngine } from '../voice/edge-tts';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -32,49 +33,59 @@ export class VoiceService {
       return;
     }
 
+    let asrInitialized = false;
+    let ttsInitialized = false;
+
+    // 初始化 ASR 引擎（允许失败）
+    const asrEngineType = asrOptions.engine || process.env.ASR_ENGINE || 'whisper';
     try {
-      // 初始化 ASR 引擎
-      const asrEngineType = asrOptions.engine || process.env.ASR_ENGINE || 'whisper';
       switch (asrEngineType) {
         case 'whisper':
           this.asrEngine = new WhisperASREngine(asrOptions);
           break;
         case 'vosk':
-          // TODO: 实现 Vosk 引擎
           throw new Error('Vosk 引擎尚未实现');
         case 'xunfei':
-          // TODO: 实现科大讯飞云端引擎
           throw new Error('科大讯飞引擎尚未实现');
         default:
           throw new Error(`不支持的 ASR 引擎: ${asrEngineType}`);
       }
-
       await this.asrEngine.init();
+      asrInitialized = true;
+      console.log(`✅ ASR 引擎初始化成功: ${asrEngineType}`);
+    } catch (error) {
+      console.warn(`⚠️ ASR 引擎初始化失败 (${asrEngineType}):`, error instanceof Error ? error.message : error);
+      // ASR 失败不阻止服务启动
+    }
 
-      // 初始化 TTS 引擎
-      const ttsEngineType = ttsOptions.engine || process.env.TTS_ENGINE || 'paddle';
+    // 初始化 TTS 引擎
+    const ttsEngineType = ttsOptions.engine || process.env.TTS_ENGINE || 'paddle';
+    try {
       switch (ttsEngineType) {
         case 'paddle':
           this.ttsEngine = new PaddleTTSEngine(ttsOptions);
           break;
         case 'edge':
-          // TODO: 实现 Edge-TTS 引擎
-          throw new Error('Edge-TTS 引擎尚未实现');
+          this.ttsEngine = new EdgeTTSEngine(ttsOptions);
+          break;
         case 'xunfei':
-          // TODO: 实现科大讯飞云端 TTS
           throw new Error('科大讯飞 TTS 引擎尚未实现');
         default:
           throw new Error(`不支持的 TTS 引擎: ${ttsEngineType}`);
       }
-
       await this.ttsEngine.init();
-
-      this.initialized = true;
-
-      console.log(`✅ 语音服务初始化成功，ASR: ${asrEngineType}, TTS: ${ttsEngineType}`);
+      ttsInitialized = true;
+      console.log(`✅ TTS 引擎初始化成功: ${ttsEngineType}`);
     } catch (error) {
-      console.error('❌ 语音服务初始化失败:', error);
-      throw error;
+      console.warn(`⚠️ TTS 引擎初始化失败 (${ttsEngineType}):`, error instanceof Error ? error.message : error);
+    }
+
+    // 至少一个引擎初始化成功即可
+    if (asrInitialized || ttsInitialized) {
+      this.initialized = true;
+      console.log(`✅ 语音服务初始化完成，ASR: ${asrInitialized ? '可用' : '不可用'}, TTS: ${ttsInitialized ? '可用' : '不可用'}`);
+    } else {
+      throw new Error('语音服务初始化失败：ASR 和 TTS 引擎都不可用');
     }
   }
 

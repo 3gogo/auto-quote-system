@@ -1,0 +1,79 @@
+<!--
+  设置页面
+-->
+<view class="container">
+  <!-- 服务器设置 -->
+  <view class="section">
+    <view class="section-title">服务器设置</view>
+    <view class="section-content">
+      <view class="setting-item">
+        <text class="setting-label">服务器地址</text>
+        <input 
+          class="setting-input"
+          type="text"
+          value="{{serverUrl}}"
+          placeholder="http://localhost:3001/api"
+          bindinput="onServerUrlChange"
+        />
+      </view>
+      <view class="setting-actions">
+        <button class="btn-secondary" bindtap="testConnection">测试连接</button>
+        <button class="btn-primary" bindtap="saveServerUrl">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 语音设置 -->
+  <view class="section">
+    <view class="section-title">语音设置</view>
+    <view class="section-content">
+      <view class="setting-item">
+        <view class="setting-info">
+          <text class="setting-label">语音功能</text>
+          <text class="setting-desc">开启后可使用语音报价</text>
+        </view>
+        <switch 
+          checked="{{voiceEnabled}}" 
+          bindchange="onVoiceEnabledChange"
+          color="#1677ff"
+        />
+      </view>
+      <view class="setting-item">
+        <view class="setting-info">
+          <text class="setting-label">自动播放回复</text>
+          <text class="setting-desc">自动播放 AI 语音回复</text>
+        </view>
+        <switch 
+          checked="{{autoPlay}}" 
+          bindchange="onAutoPlayChange"
+          color="#1677ff"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 其他设置 -->
+  <view class="section">
+    <view class="section-title">其他</view>
+    <view class="section-content">
+      <view class="setting-item clickable" bindtap="clearCache">
+        <text class="setting-label">清除缓存</text>
+        <image src="/images/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+      </view>
+      <view class="setting-item clickable" bindtap="showAbout">
+        <view class="setting-info">
+          <text class="setting-label">关于</text>
+        </view>
+        <view class="setting-extra">
+          <text class="setting-version">v{{version}}</text>
+          <image src="/images/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+        </view>
+      </view>
+      <view class="setting-item clickable" bindtap="feedback">
+        <text class="setting-label">意见反馈</text>
+        <image src="/images/arrow-right.png" class="arrow-icon" mode="aspectFit"></image>
+      </view>
+    </view>
+  </view>
+</view>
+

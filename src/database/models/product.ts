@@ -2,33 +2,33 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity('products')
 export class Product {
-  @PrimaryGeneratedColumn('bigint')
-  id: number;
+  @PrimaryGeneratedColumn()
+  id!: number;
 
   @Column({ length: 255, comment: '正式商品名称' })
-  name: string;
+  name!: string;
 
   @Column({ type: 'json', nullable: true, comment: '商品别名列表' })
-  aliases: string[];
+  aliases!: string[];
 
   @Column({ length: 50, nullable: true, comment: '条码（可选）' })
-  barcode: string;
+  barcode!: string;
 
   @Column({ length: 50, comment: '商品类别（饮料/纸品等）' })
-  category: string;
+  category!: string;
 
   @Column({ length: 20, comment: '单位（瓶/包/箱等）' })
-  unit: string;
+  unit!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, comment: '标准进货成本（可为空）' })
-  baseCost: number;
+  baseCost!: number;
 
   @Column({ default: true, comment: '是否启用/在售' })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn({ comment: '创建时间' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ comment: '更新时间' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

@@ -37,12 +37,12 @@ export class AliyunASRProvider extends BaseASRProvider {
   private enableDialect: boolean;
   private dialect: string;
 
-  constructor(config: AliyunASRConfig = {}) {
+  constructor(config: Partial<AliyunASRConfig> = {}) {
     super({
       name: 'aliyun-paraformer',
       type: 'aliyun-paraformer',
       ...config
-    });
+    } as AliyunASRConfig);
 
     this.apiKey = config.apiKey || process.env.DASHSCOPE_API_KEY || '';
     this.model = config.model || 'paraformer-realtime-v2';
@@ -147,7 +147,7 @@ export class AliyunASRProvider extends BaseASRProvider {
         throw new Error(`阿里云 ASR 接口错误: ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = await response.json() as any;
       
       return {
         text: result.output?.text || '',

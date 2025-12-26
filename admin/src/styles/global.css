@@ -1,0 +1,144 @@
+/* 全局样式 - 小店报价助手后台 */
+
+:root {
+  /* 主题色 */
+  --primary-color: #1677ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --danger-color: #ff4d4f;
+  
+  /* 背景色 */
+  --bg-color: #f5f5f5;
+  --card-bg: #ffffff;
+  
+  /* 文字颜色 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  
+  /* 边框颜色 */
+  --border-color: #e8e8e8;
+  
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, 
+    Arial, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 通用卡片样式 */
+.page-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  margin: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* 金额显示 */
+.amount {
+  font-weight: 600;
+  color: var(--danger-color);
+}
+
+.amount::before {
+  content: '¥';
+  font-size: 0.8em;
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.status-tag.success {
+  background: #f6ffed;
+  color: var(--success-color);
+}
+
+.status-tag.warning {
+  background: #fffbe6;
+  color: var(--warning-color);
+}
+
+.status-tag.error {
+  background: #fff2f0;
+  color: var(--danger-color);
+}
+
+/* 底部导航安全区域 */
+.safe-area-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+
+.empty-state svg {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* 列表项悬停效果 */
+.list-item-hover:active {
+  background-color: #f5f5f5;
+}
+
+/* 滑动删除按钮 */
+.swipe-action-delete {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+/* 加载更多提示 */
+.load-more {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+

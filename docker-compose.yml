@@ -1,0 +1,130 @@
+# ============================================
+# AI 小店报价助手 - Docker Compose 配置
+# ============================================
+
+version: '3.8'
+
+services:
+  # 后端 API 服务
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auto-quote-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-auto_quote}
+      - DB_PASSWORD=${DB_PASSWORD:-auto_quote_password}
+      - DB_NAME=${DB_NAME:-auto_quote_system}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # AI/NLU 配置
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-}
+      # 语音配置
+      - TTS_ENGINE=${TTS_ENGINE:-edge}
+      - ASR_ENGINE=${ASR_ENGINE:-whisper}
+      - WHISPER_CPP_PATH=/opt/whisper/main
+      - WHISPER_MODEL_PATH=/opt/models/ggml-base.bin
+      # 其他
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    volumes:
+      # 挂载 Whisper 模型（需要预先下载）
+      - ${WHISPER_MODEL_DIR:-./models}:/opt/models:ro
+      - ${WHISPER_CPP_DIR:-./whisper.cpp}:/opt/whisper:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - auto-quote-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: auto-quote-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password}
+      - MYSQL_DATABASE=${DB_NAME:-auto_quote_system}
+      - MYSQL_USER=${DB_USER:-auto_quote}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-auto_quote_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - auto-quote-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: auto-quote-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - auto-quote-network
+
+  # 后台管理界面（可选）
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: auto-quote-admin
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - auto-quote-network
+
+  # H5 应用（可选）
+  h5:
+    build:
+      context: ./client/h5
+      dockerfile: Dockerfile
+    container_name: auto-quote-h5
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    depends_on:
+      - api
+    networks:
+      - auto-quote-network
+
+networks:
+  auto-quote-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+

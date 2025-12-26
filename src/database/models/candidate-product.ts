@@ -2,17 +2,17 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity('candidate_products')
 export class CandidateProduct {
-  @PrimaryGeneratedColumn('bigint')
-  id: number;
+  @PrimaryGeneratedColumn()
+  id!: number;
 
   @Column({ length: 255, comment: '商品候选名称' })
-  name: string;
+  name!: string;
 
   @Column({ type: 'int', default: 1, comment: '出现次数' })
-  frequency: number;
+  frequency!: number;
 
   @Column({ type: 'json', comment: '价格分布' })
-  priceDistribution: {
+  priceDistribution!: {
     min: number;
     max: number;
     avg: number;
@@ -20,17 +20,17 @@ export class CandidateProduct {
   };
 
   @Column({ type: 'json', comment: '别名聚类' })
-  aliasesCluster: string[];
+  aliasesCluster!: string[];
 
   @Column({ type: 'boolean', default: false, comment: '是否已确认' })
-  confirmed: boolean;
+  confirmed!: boolean;
 
   @Column({ type: 'bigint', nullable: true, comment: '关联的正式商品 ID（确认后设置）' })
-  productId: number;
+  productId!: number;
 
   @CreateDateColumn({ comment: '创建时间' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ comment: '更新时间' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

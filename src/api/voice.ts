@@ -1,12 +1,152 @@
 import express from 'express';
 import { voiceService } from '../services/voice-service';
 import { hotwordService } from '../services/hotword-service';
+import { conversationManager } from '../services/conversation-manager';
 import { VoiceRecognitionRequest, VoiceRecognitionResponse, TTSSynthesisRequest, TTSSynthesisResponse } from '../types/voice';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Request, Response } from 'express';
 
 const router = express.Router();
+
+/**
+ * 语音处理端点（小程序专用）
+ * 集成语音识别、NLU 处理、报价生成和 TTS 合成
+ */
+router.post('/process', async (req: Request, res: Response) => {
+  try {
+    const { 
+      sessionId, 
+      audioData, 
+      audioFormat = 'mp3',
+      sampleRate = 16000,
+      partnerId 
+    } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: { message: '缺少会话 ID', code: 'MISSING_SESSION_ID' }
+      });
+    }
+
+    if (!audioData) {
+      return res.status(400).json({
+        success: false,
+        error: { message: '缺少音频数据', code: 'MISSING_AUDIO_DATA' }
+      });
+    }
+
+    // 1. 解码音频数据
+    let audioBuffer: Buffer;
+    try {
+      audioBuffer = Buffer.from(audioData, 'base64');
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: { message: '音频数据格式错误', code: 'INVALID_AUDIO_FORMAT' }
+      });
+    }
+
+    // 2. 获取热词并执行语音识别
+    await hotwordService.refreshIfNeeded();
+    const hotwordsList = hotwordService.getAllHotwords();
+    voiceService.setHotwords(hotwordsList);
+
+    const asrResult = await voiceService.recognizeSpeech(audioBuffer, {
+      language: 'zh-CN',
+      hotwords: hotwordsList
+    });
+
+    const recognizedText = asrResult.text;
+    console.log(`[语音处理] 识别结果: ${recognizedText}`);
+
+    if (!recognizedText || recognizedText.trim().length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          recognizedText: '',
+          response: {
+            text: '抱歉，没有识别到语音内容，请再说一次',
+            audioData: null
+          },
+          quote: null
+        }
+      });
+    }
+
+    // 3. 使用会话管理器处理文本
+    const conversationResult = await conversationManager.processInput({
+      sessionId,
+      text: recognizedText,
+      partnerId
+    });
+
+    // 4. 生成 TTS 回复
+    let audioResponseData: string | null = null;
+    if (conversationResult.text) {
+      try {
+        const ttsResult = await voiceService.synthesizeSpeech(conversationResult.text, {
+          speaker: 'default',
+          speed: 1.0,
+          volume: 80,
+          format: 'mp3',
+          sampleRate: 16000,
+          language: 'zh-CN'
+        });
+        
+        if (ttsResult.buffer) {
+          audioResponseData = ttsResult.buffer.toString('base64');
+        }
+      } catch (ttsError) {
+        console.error('[语音处理] TTS 合成失败:', ttsError);
+        // TTS 失败不影响主流程
+      }
+    }
+
+    // 5. 构建报价数据
+    let quoteData = null;
+    if (conversationResult.quote && conversationResult.quote.items.length > 0) {
+      quoteData = {
+        items: conversationResult.quote.items.map(item => ({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          unit: item.unit || '份',
+          unitPrice: item.suggestedUnitPrice,
+          totalPrice: item.suggestedSubtotal
+        })),
+        totalAmount: conversationResult.quote.totalSuggestedPrice,
+        customerName: conversationResult.context?.currentPartner?.name || null,
+        partnerId: conversationResult.context?.currentPartner?.id || partnerId
+      };
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        recognizedText,
+        response: {
+          text: conversationResult.text,
+          audioData: audioResponseData
+        },
+        quote: quoteData,
+        intent: conversationResult.intent,
+        state: conversationResult.state
+      }
+    });
+
+  } catch (error) {
+    console.error('[语音处理] 错误:', error);
+    return res.status(500).json({
+      success: false,
+      error: {
+        message: error instanceof Error ? error.message : '语音处理失败',
+        code: 'VOICE_PROCESS_ERROR'
+      }
+    });
+  }
+});
 
 /**
  * 语音识别接口

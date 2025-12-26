@@ -1,0 +1,87 @@
+/* 交易列表页面样式 */
+
+.transaction-list-page {
+  background-color: var(--bg-color);
+  min-height: 100%;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: var(--text-tertiary);
+  gap: 16px;
+}
+
+.search-bar {
+  background-color: var(--card-bg);
+  padding: 12px 16px;
+}
+
+/* 交易分组 */
+.transaction-groups {
+  padding-bottom: 20px;
+}
+
+.transaction-group {
+  margin-top: 12px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.group-date {
+  font-weight: 500;
+}
+
+.group-count {
+  color: var(--text-tertiary);
+}
+
+/* 列表项 */
+.item-content {
+  display: flex;
+  align-items: center;
+}
+
+.item-summary {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.item-description {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.item-time {
+  color: var(--text-tertiary);
+}
+
+.item-partner {
+  padding: 1px 6px;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+/* 金额 */
+.transaction-list-page .amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--danger-color);
+}
+

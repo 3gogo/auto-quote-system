@@ -1,0 +1,116 @@
+<!--
+  首页 - 语音报价界面
+-->
+<view class="container">
+  <!-- 今日统计 -->
+  <view class="stats-card">
+    <view class="stats-item">
+      <text class="stats-value">{{todayStats.orderCount}}</text>
+      <text class="stats-label">今日订单</text>
+    </view>
+    <view class="stats-divider"></view>
+    <view class="stats-item">
+      <text class="stats-value amount">{{todayStats.totalAmount}}</text>
+      <text class="stats-label">今日销售额</text>
+    </view>
+  </view>
+
+  <!-- 对话区域 -->
+  <view class="chat-area" id="message-list">
+    <block wx:if="{{messages.length === 0}}">
+      <view class="welcome-message">
+        <image src="/images/voice-big.png" class="welcome-icon" mode="aspectFit"></image>
+        <text class="welcome-text">按住下方按钮开始语音报价</text>
+        <text class="welcome-hint">例如："老王要5斤猪肉3斤白菜"</text>
+      </view>
+    </block>
+    
+    <block wx:for="{{messages}}" wx:key="id">
+      <view class="message {{item.role === 'user' ? 'message-user' : 'message-assistant'}}">
+        <view class="message-bubble">
+          <text>{{item.content}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 当前报价卡片 -->
+  <view class="quote-card" wx:if="{{currentQuote}}">
+    <view class="quote-header">
+      <text class="quote-title">📋 报价单</text>
+      <text class="quote-customer" wx:if="{{currentQuote.customerName}}">
+        客户：{{currentQuote.customerName}}
+      </text>
+    </view>
+    
+    <view class="quote-items">
+      <view class="quote-item" wx:for="{{currentQuote.items}}" wx:key="index">
+        <view class="item-info">
+          <text class="item-name">{{item.productName}}</text>
+          <text class="item-qty">×{{item.quantity}}{{item.unit}}</text>
+        </view>
+        <view class="item-price">
+          <text class="price-unit">¥{{item.unitPrice}}/{{item.unit}}</text>
+          <text class="price-total amount">{{item.totalPrice}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="quote-footer">
+      <view class="quote-total">
+        <text>合计：</text>
+        <text class="total-amount amount">{{currentQuote.totalAmount}}</text>
+      </view>
+      <view class="quote-actions">
+        <button class="btn-cancel" bindtap="cancelQuote">取消</button>
+        <button class="btn-confirm" bindtap="confirmQuote">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="action-area">
+    <!-- 录音状态提示 -->
+    <view class="recording-status" wx:if="{{isRecording}}">
+      <view class="wave-container {{waveAnimation ? 'animating' : ''}}">
+        <view class="wave-bar"></view>
+        <view class="wave-bar"></view>
+        <view class="wave-bar"></view>
+        <view class="wave-bar"></view>
+        <view class="wave-bar"></view>
+      </view>
+      <text class="recording-time">{{recordingTime}}s</text>
+      <text class="recording-hint">松开发送，上滑取消</text>
+    </view>
+
+    <!-- 处理中状态 -->
+    <view class="processing-status" wx:if="{{isProcessing}}">
+      <view class="loading-spinner"></view>
+      <text>处理中...</text>
+    </view>
+
+    <!-- 录音按钮 -->
+    <view 
+      class="record-btn {{isRecording ? 'recording' : ''}} {{isProcessing ? 'disabled' : ''}}"
+      bindtouchstart="onRecordStart"
+      bindtouchend="onRecordEnd"
+      bindtouchcancel="onRecordCancel"
+      catchtouchmove="onRecordCancel"
+    >
+      <image 
+        src="{{isRecording ? '/images/voice-recording.png' : '/images/voice-btn.png'}}" 
+        class="record-icon"
+        mode="aspectFit"
+      ></image>
+      <text class="record-text">
+        {{isRecording ? '松开发送' : '按住说话'}}
+      </text>
+    </view>
+
+    <!-- 清空按钮 -->
+    <view class="clear-btn" bindtap="clearConversation" wx:if="{{messages.length > 0}}">
+      <text>清空</text>
+    </view>
+  </view>
+</view>
+

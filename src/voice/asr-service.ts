@@ -56,6 +56,8 @@ export class ASRService {
 
       // 注册阿里云 Provider
       const aliyunProvider = new AliyunASRProvider({
+        name: 'aliyun-paraformer',
+        type: 'aliyun-paraformer',
         model: 'paraformer-realtime-v2',
         enableDialect: true
       });

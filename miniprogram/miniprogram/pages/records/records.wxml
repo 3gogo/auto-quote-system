@@ -1,0 +1,77 @@
+<!--
+  交易记录页面
+-->
+<view class="container">
+  <!-- 日期筛选 -->
+  <view class="filter-bar">
+    <view 
+      class="filter-item {{dateRange === item.value ? 'active' : ''}}"
+      wx:for="{{dateOptions}}"
+      wx:key="value"
+      data-value="{{item.value}}"
+      bindtap="onDateRangeChange"
+    >
+      <text>{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- 统计摘要 -->
+  <view class="summary-bar">
+    <text class="summary-count">共 {{summary.totalCount}} 笔交易</text>
+    <text class="summary-amount">
+      合计 <text class="amount">{{summary.totalAmount}}</text>
+    </text>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="record-list">
+    <block wx:if="{{records.length > 0}}">
+      <view 
+        class="record-item"
+        wx:for="{{records}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="viewDetail"
+      >
+        <view class="record-main">
+          <view class="record-info">
+            <text class="record-partner" wx:if="{{item.partnerName}}">
+              {{item.partnerName}}
+            </text>
+            <text class="record-partner" wx:else>散客</text>
+            <text class="record-time">{{item.formattedDate}}</text>
+          </view>
+          <view class="record-amount">
+            <text class="amount">{{item.formattedAmount}}</text>
+          </view>
+        </view>
+        
+        <view class="record-items" wx:if="{{item.items && item.items.length > 0}}">
+          <text class="item-preview">
+            {{item.items[0].productName}} ×{{item.items[0].quantity}}
+            <text wx:if="{{item.items.length > 1}}">
+              等{{item.items.length}}件商品
+            </text>
+          </text>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{!loading && records.length === 0}}">
+      <image src="/images/empty.png" mode="aspectFit"></image>
+      <text>暂无交易记录</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!hasMore && records.length > 0}}">
+      <text>已加载全部</text>
+    </view>
+  </view>
+</view>
+

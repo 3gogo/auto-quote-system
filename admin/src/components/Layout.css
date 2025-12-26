@@ -1,0 +1,32 @@
+/* 布局样式 */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+.layout-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 50px; /* 为底部导航留出空间 */
+}
+
+.layout-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+
+/* TabBar 激活态颜色 */
+.layout-tabbar .adm-tab-bar-item-active {
+  color: var(--primary-color);
+}
+

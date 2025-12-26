@@ -8,6 +8,7 @@ import { intentClassifier } from './intent-classifier';
 import { entityExtractor } from './entity-extractor';
 import { AIProvider, AIProviderFactory } from './ai-provider';
 import { AliyunProvider } from './providers/aliyun-provider';
+import { createOpenAICompatibleProvider } from './providers/openai-compatible-provider';
 
 /**
  * NLU 服务配置
@@ -67,10 +68,25 @@ export class NLUService {
 
   /**
    * 初始化 AI Provider
+   * 优先级：OpenAI 兼容 > 阿里云
    */
   private async initAIProvider(): Promise<void> {
     try {
-      // 注册默认的阿里云 Provider
+      // 1. 尝试 OpenAI 兼容 Provider（优先）
+      const openaiProvider = createOpenAICompatibleProvider();
+      if (openaiProvider) {
+        AIProviderFactory.register(openaiProvider);
+        try {
+          await openaiProvider.init();
+          this.aiProvider = openaiProvider;
+          console.log('✅ 使用 OpenAI 兼容 Provider');
+          return;
+        } catch (error) {
+          console.warn('OpenAI 兼容 Provider 初始化失败:', error);
+        }
+      }
+
+      // 2. 尝试阿里云 Provider
       const aliyunProvider = new AliyunProvider({
         model: 'qwen-flash',
         useIntentModel: true
@@ -78,12 +94,14 @@ export class NLUService {
 
       AIProviderFactory.register(aliyunProvider);
 
-      // 获取指定的 Provider
-      this.aiProvider = AIProviderFactory.get(this.config.aiProviderName!);
-      
-      if (this.aiProvider) {
-        await this.aiProvider.init();
+      try {
+        await aliyunProvider.init();
+        this.aiProvider = aliyunProvider;
+        console.log('✅ 使用阿里云 Provider');
+      } catch (error) {
+        console.warn('阿里云 Provider 初始化失败:', error);
       }
+
     } catch (error) {
       console.warn('AI Provider 初始化失败，将仅使用规则层:', error);
       this.aiProvider = undefined;

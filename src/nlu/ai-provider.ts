@@ -93,36 +93,60 @@ export abstract class BaseAIProvider implements AIProvider {
    * 构建 NLU 提示词
    */
   protected buildNLUPrompt(text: string): string {
-    return `你是一个小店报价助手的意图识别器。请分析以下用户输入，返回 JSON 格式结果。
+    return `你是一个小店报价助手的意图识别器。请分析用户输入，返回 JSON 格式结果。
 
 用户输入："${text}"
 
-请识别以下内容：
-1. 意图类型 (intent)：
-   - retail_quote: 零售报价（如"张三两瓶可乐多少钱"）
-   - purchase_price_check: 进货核价（如"老李那边可乐进价多少"）
-   - single_item_query: 单品价格查询（如"可乐怎么卖"）
-   - price_correction: 纠错改价（如"按11块算"）
-   - confirm: 确认（如"好的"、"行"）
-   - deny: 否定（如"不对"、"重新来"）
-   - unknown: 无法识别
+## 意图识别规则（重要！按优先级判断）
 
-2. 顾客/供货商 (partner)：名称和类型（customer/supplier）
+### 1. confirm 确认意图
+单字表达优先判断为确认：
+- "行" "好" "嗯" "可以" "对" "是" "OK" → confirm
+- "好的" "行吧" "可以的" "成交" "就这样" → confirm
 
-3. 商品列表 (products)：每个商品包含名称、数量、单位
+### 2. deny 否定/取消意图
+- "不要了" "不买了" "算了" "取消" "重新来" "不对" → deny
+- 含"不"+"要/买/行"组合 → deny
+- 含"算了" → deny
 
-4. 价格表达 (prices)：如果用户提到了具体价格
+### 3. price_correction 价格修正
+- "按X块算" "便宜点" "抹零" "打折" "少算点" → price_correction
 
-返回格式（严格 JSON）：
+### 4. single_item_query 单品查价
+仅当明确询问单品价格时：
+- "XXX怎么卖" "XXX什么价" "XXX多少钱一个/瓶" → single_item_query
+注意：有具体数量时应为 retail_quote
+
+### 5. purchase_price_check 进货查价
+含以下关键词时：
+- "进价" "批发价" "老李/老王/批发商那边" "进货" → purchase_price_check
+
+### 6. retail_quote 零售报价（默认意图）
+- 提到商品+数量 → retail_quote
+- "一箱矿泉水" "两瓶可乐" → retail_quote（有数量即报价）
+- 口语表达如 "给我来" "给俺整" "帮我弄" → retail_quote
+
+### 7. unknown
+无法识别或闲聊问候 → unknown
+
+## 数量单位转换
+- "一打" = 12个
+- "一条烟" = 10包
+- "一箱" = 视商品而定
+- "半斤" = 0.5斤
+
+## 上下文理解
+- "再来一瓶" → 需要上下文，返回 retail_quote + 商品信息
+- "跟刚才一样" → retail_quote，商品为空需要上下文
+
+## 返回格式（严格 JSON）
 {
   "intent": { "type": "retail_quote", "confidence": 0.95 },
   "partner": { "name": "张三", "type": "customer", "confidence": 0.9 },
   "products": [
     { "name": "可乐", "quantity": 2, "unit": "瓶", "confidence": 0.95 }
   ],
-  "prices": [
-    { "value": 3, "unit": "元", "context": "可乐3块" }
-  ]
+  "prices": []
 }
 
 只返回 JSON，不要其他解释。`;

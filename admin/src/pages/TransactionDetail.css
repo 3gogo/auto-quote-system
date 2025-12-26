@@ -1,0 +1,141 @@
+/* 交易详情页面样式 */
+
+.detail-page {
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--text-tertiary);
+  gap: 16px;
+}
+
+.section-title {
+  padding: 16px 16px 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 金额卡片 */
+.amount-card {
+  margin: 12px;
+  border-radius: 12px;
+}
+
+.amount-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.detail-time {
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.total-amount {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.total-amount .currency {
+  font-size: 20px;
+  color: var(--danger-color);
+  font-weight: 500;
+}
+
+.total-amount .value {
+  font-size: 42px;
+  font-weight: 600;
+  color: var(--danger-color);
+}
+
+.partner-info {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+/* 商品卡片 */
+.items-card {
+  margin: 0 12px;
+  border-radius: 12px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-name {
+  font-weight: 500;
+}
+
+.item-qty {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.item-subtotal {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 利润卡片 */
+.profit-card {
+  margin: 0 12px;
+  border-radius: 12px;
+}
+
+.profit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+
+.profit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profit-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.profit-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.profit-value.success {
+  color: var(--success-color);
+}
+
+/* 原始语音卡片 */
+.raw-text-card {
+  margin: 0 12px;
+  border-radius: 12px;
+}
+
+.raw-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-style: italic;
+}
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AutoQuote" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#1677FF</item>
+        <item name="colorPrimaryDark">#0958D9</item>
+        <item name="colorAccent">#4096FF</item>
+        <item name="android:statusBarColor">@color/status_bar</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+    </style>
+</resources>
+

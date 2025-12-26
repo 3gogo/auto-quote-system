@@ -26,19 +26,20 @@ export class WhisperProvider extends BaseASRProvider {
 
   private whisperEngine: WhisperASREngine;
 
-  constructor(config: WhisperProviderConfig = {}) {
+  constructor(config: Partial<WhisperProviderConfig> = {}) {
+    const { modelPath, whisperPath, ...baseConfig } = config;
     super({
       name: 'whisper',
       type: 'whisper',
       language: 'zh',
-      ...config
-    });
+      ...baseConfig
+    } as WhisperProviderConfig);
 
     this.whisperEngine = new WhisperASREngine({
       language: config.language || 'zh',
       modelPath: config.modelPath,
       whisperPath: config.whisperPath
-    });
+    } as any);
   }
 
   async init(): Promise<void> {
